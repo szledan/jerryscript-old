@@ -15,8 +15,10 @@
  */
 
 #include "ecma-alloc.h"
+#include "ecma-builtin-helpers.h"
 #include "ecma-globals.h"
 #include "ecma-helpers.h"
+#include "ecma-objects.h"
 
 #ifndef CONFIG_ECMA_COMPACT_PROFILE_DISABLE_DATE_BUILTIN
 
@@ -139,7 +141,7 @@ ecma_builtin_date_prototype_to_locale_time_string (ecma_value_t this_arg) /**< t
 static ecma_completion_value_t
 ecma_builtin_date_prototype_value_of (ecma_value_t this_arg) /**< this argument */
 {
-  ECMA_BUILTIN_CP_UNIMPLEMENTED (this_arg);
+  return ecma_builtin_date_prototype_get_time (this_arg);
 } /* ecma_builtin_date_prototype_value_of */
 
 /**
@@ -154,7 +156,22 @@ ecma_builtin_date_prototype_value_of (ecma_value_t this_arg) /**< this argument 
 static ecma_completion_value_t
 ecma_builtin_date_prototype_get_time (ecma_value_t this_arg) /**< this argument */
 {
-  ECMA_BUILTIN_CP_UNIMPLEMENTED (this_arg);
+  if (!(ecma_is_value_object (this_arg)
+        && (ecma_object_get_class_name (obj_p) == ECMA_OBJECT_TYPE_DATE)))
+  {
+    return ecma_make_throw_obj_completion_value (ecma_new_standard_error (ECMA_ERROR_TYPE));
+  }
+
+  ecma_property_t *prim_value_prop_p = ecma_get_internal_property (obj_p,
+                                                                   ECMA_INTERNAL_PROPERTY_PRIMITIVE_DATE_VALUE);
+
+  ecma_number_t *prim_value_num_p = ECMA_GET_NON_NULL_POINTER (ecma_number_t,
+                                                               prim_value_prop_p->u.internal_property.value);
+
+  ecma_number_t *ret_num_p = ecma_alloc_number ();
+  *ret_num_p = *prim_value_num_p;
+
+  return ecma_make_normal_completion_value (ecma_make_number_value (ret_num_p));
 } /* ecma_builtin_date_prototype_get_time */
 
 /**
@@ -169,7 +186,30 @@ ecma_builtin_date_prototype_get_time (ecma_value_t this_arg) /**< this argument 
 static ecma_completion_value_t
 ecma_builtin_date_prototype_get_full_year (ecma_value_t this_arg) /**< this argument */
 {
-  ECMA_BUILTIN_CP_UNIMPLEMENTED (this_arg);
+  ecma_completion_value_t ret_value = ecma_make_empty_completion_value ();
+
+  /* 1. */
+  ECMA_TRY_CATCH (value, ecma_builtin_date_prototype_get_time (this_arg), ret_value);
+  ecma_number_t *this_num = ecma_get_number_from_value (value);
+
+  /* 2. */
+  if (ecma_number_is_nan (*this_num))
+  {
+    ecma_string_t *nan_str_p = ecma_get_magic_string (ECMA_MAGIC_STRING_NAN);
+    ret_value = ecma_make_normal_completion_value (ecma_make_string_value (nan_str_p));
+  }
+  else
+  {
+    /* 3. */
+    int full_year = ecma_date_year_from_time (ecma_date_local_time (*this_num));
+
+    ecma_number_t *ret_num_p = ecma_alloc_number ();
+    *ret_num_p = ecma_int32_to_number (full_year);
+    ret_value = ecma_make_normal_completion_value (ecma_make_number_value (ret_num_p));
+  }
+  ECMA_FINALIZE (value);
+
+  return ret_value;
 } /* ecma_builtin_date_prototype_get_full_year */
 
 /**
@@ -184,7 +224,30 @@ ecma_builtin_date_prototype_get_full_year (ecma_value_t this_arg) /**< this argu
 static ecma_completion_value_t
 ecma_builtin_date_prototype_get_utc_full_year (ecma_value_t this_arg) /**< this argument */
 {
-  ECMA_BUILTIN_CP_UNIMPLEMENTED (this_arg);
+  ecma_completion_value_t ret_value = ecma_make_empty_completion_value ();
+
+  /* 1. */
+  ECMA_TRY_CATCH (value, ecma_builtin_date_prototype_get_time (this_arg), ret_value);
+  ecma_number_t *this_num = ecma_get_number_from_value (value);
+
+  /* 2. */
+  if (ecma_number_is_nan (*this_num))
+  {
+    ecma_string_t *nan_str_p = ecma_get_magic_string (ECMA_MAGIC_STRING_NAN);
+    ret_value = ecma_make_normal_completion_value (ecma_make_string_value (nan_str_p));
+  }
+  else
+  {
+    /* 3. */
+    int utc_full_year = ecma_date_year_from_time (*this_num);
+
+    ecma_number_t *ret_num_p = ecma_alloc_number ();
+    *ret_num_p = ecma_int32_to_number (utc_full_year);
+    ret_value = ecma_make_normal_completion_value (ecma_make_number_value (ret_num_p));
+  }
+  ECMA_FINALIZE (value);
+
+  return ret_value;
 } /* ecma_builtin_date_prototype_get_utc_full_year */
 
 /**
@@ -199,7 +262,30 @@ ecma_builtin_date_prototype_get_utc_full_year (ecma_value_t this_arg) /**< this 
 static ecma_completion_value_t
 ecma_builtin_date_prototype_get_month (ecma_value_t this_arg) /**< this argument */
 {
-  ECMA_BUILTIN_CP_UNIMPLEMENTED (this_arg);
+  ecma_completion_value_t ret_value = ecma_make_empty_completion_value ();
+
+  /* 1. */
+  ECMA_TRY_CATCH (value, ecma_builtin_date_prototype_get_time (this_arg), ret_value);
+  ecma_number_t *this_num = ecma_get_number_from_value (value);
+
+  /* 2. */
+  if (ecma_number_is_nan (*this_num))
+  {
+    ecma_string_t *nan_str_p = ecma_get_magic_string (ECMA_MAGIC_STRING_NAN);
+    ret_value = ecma_make_normal_completion_value (ecma_make_string_value (nan_str_p));
+  }
+  else
+  {
+    /* 3. */
+    int month = ecma_date_month_from_time (ecma_date_local_time (*this_num));
+
+    ecma_number_t *ret_num_p = ecma_alloc_number ();
+    *ret_num_p = ecma_int32_to_number (month);
+    ret_value = ecma_make_normal_completion_value (ecma_make_number_value (ret_num_p));
+  }
+  ECMA_FINALIZE (value);
+
+  return ret_value;
 } /* ecma_builtin_date_prototype_get_month */
 
 /**
@@ -214,7 +300,30 @@ ecma_builtin_date_prototype_get_month (ecma_value_t this_arg) /**< this argument
 static ecma_completion_value_t
 ecma_builtin_date_prototype_get_utc_month (ecma_value_t this_arg) /**< this argument */
 {
-  ECMA_BUILTIN_CP_UNIMPLEMENTED (this_arg);
+  ecma_completion_value_t ret_value = ecma_make_empty_completion_value ();
+
+  /* 1. */
+  ECMA_TRY_CATCH (value, ecma_builtin_date_prototype_get_time (this_arg), ret_value);
+  ecma_number_t *this_num = ecma_get_number_from_value (value);
+
+  /* 2. */
+  if (ecma_number_is_nan (*this_num))
+  {
+    ecma_string_t *nan_str_p = ecma_get_magic_string (ECMA_MAGIC_STRING_NAN);
+    ret_value = ecma_make_normal_completion_value (ecma_make_string_value (nan_str_p));
+  }
+  else
+  {
+    /* 3. */
+    int utc_month = ecma_date_month_from_time (*this_num);
+
+    ecma_number_t *ret_num_p = ecma_alloc_number ();
+    *ret_num_p = ecma_int32_to_number (utc_month);
+    ret_value = ecma_make_normal_completion_value (ecma_make_number_value (ret_num_p));
+  }
+  ECMA_FINALIZE (value);
+
+  return ret_value;
 } /* ecma_builtin_date_prototype_get_utc_month */
 
 /**
@@ -229,7 +338,30 @@ ecma_builtin_date_prototype_get_utc_month (ecma_value_t this_arg) /**< this argu
 static ecma_completion_value_t
 ecma_builtin_date_prototype_get_date (ecma_value_t this_arg) /**< this argument */
 {
-  ECMA_BUILTIN_CP_UNIMPLEMENTED (this_arg);
+  ecma_completion_value_t ret_value = ecma_make_empty_completion_value ();
+
+  /* 1. */
+  ECMA_TRY_CATCH (value, ecma_builtin_date_prototype_get_time (this_arg), ret_value);
+  ecma_number_t *this_num = ecma_get_number_from_value (value);
+
+  /* 2. */
+  if (ecma_number_is_nan (*this_num))
+  {
+    ecma_string_t *nan_str_p = ecma_get_magic_string (ECMA_MAGIC_STRING_NAN);
+    ret_value = ecma_make_normal_completion_value (ecma_make_string_value (nan_str_p));
+  }
+  else
+  {
+    /* 3. */
+    int date = ecma_date_date_from_time (ecma_date_local_time (*this_num));
+
+    ecma_number_t *ret_num_p = ecma_alloc_number ();
+    *ret_num_p = ecma_int32_to_number (date);
+    ret_value = ecma_make_normal_completion_value (ecma_make_number_value (ret_num_p));
+  }
+  ECMA_FINALIZE (value);
+
+  return ret_value;
 } /* ecma_builtin_date_prototype_get_date */
 
 /**
@@ -244,7 +376,30 @@ ecma_builtin_date_prototype_get_date (ecma_value_t this_arg) /**< this argument 
 static ecma_completion_value_t
 ecma_builtin_date_prototype_get_utc_date (ecma_value_t this_arg) /**< this argument */
 {
-  ECMA_BUILTIN_CP_UNIMPLEMENTED (this_arg);
+  ecma_completion_value_t ret_value = ecma_make_empty_completion_value ();
+
+  /* 1. */
+  ECMA_TRY_CATCH (value, ecma_builtin_date_prototype_get_time (this_arg), ret_value);
+  ecma_number_t *this_num = ecma_get_number_from_value (value);
+
+  /* 2. */
+  if (ecma_number_is_nan (*this_num))
+  {
+    ecma_string_t *nan_str_p = ecma_get_magic_string (ECMA_MAGIC_STRING_NAN);
+    ret_value = ecma_make_normal_completion_value (ecma_make_string_value (nan_str_p));
+  }
+  else
+  {
+    /* 3. */
+    int utc_date = ecma_date_date_from_time (*this_num);
+
+    ecma_number_t *ret_num_p = ecma_alloc_number ();
+    *ret_num_p = ecma_int32_to_number (utc_date);
+    ret_value = ecma_make_normal_completion_value (ecma_make_number_value (ret_num_p));
+  }
+  ECMA_FINALIZE (value);
+
+  return ret_value;
 } /* ecma_builtin_date_prototype_get_utc_date */
 
 /**
@@ -259,7 +414,30 @@ ecma_builtin_date_prototype_get_utc_date (ecma_value_t this_arg) /**< this argum
 static ecma_completion_value_t
 ecma_builtin_date_prototype_get_day (ecma_value_t this_arg) /**< this argument */
 {
-  ECMA_BUILTIN_CP_UNIMPLEMENTED (this_arg);
+  ecma_completion_value_t ret_value = ecma_make_empty_completion_value ();
+
+  /* 1. */
+  ECMA_TRY_CATCH (value, ecma_builtin_date_prototype_get_time (this_arg), ret_value);
+  ecma_number_t *this_num = ecma_get_number_from_value (value);
+
+  /* 2. */
+  if (ecma_number_is_nan (*this_num))
+  {
+    ecma_string_t *nan_str_p = ecma_get_magic_string (ECMA_MAGIC_STRING_NAN);
+    ret_value = ecma_make_normal_completion_value (ecma_make_string_value (nan_str_p));
+  }
+  else
+  {
+    /* 3. */
+    int day = ecma_date_week_day (ecma_date_local_time (*this_num));
+
+    ecma_number_t *ret_num_p = ecma_alloc_number ();
+    *ret_num_p = ecma_int32_to_number (day);
+    ret_value = ecma_make_normal_completion_value (ecma_make_number_value (ret_num_p));
+  }
+  ECMA_FINALIZE (value);
+
+  return ret_value;
 } /* ecma_builtin_date_prototype_get_day */
 
 /**
@@ -274,7 +452,30 @@ ecma_builtin_date_prototype_get_day (ecma_value_t this_arg) /**< this argument *
 static ecma_completion_value_t
 ecma_builtin_date_prototype_get_utc_day (ecma_value_t this_arg) /**< this argument */
 {
-  ECMA_BUILTIN_CP_UNIMPLEMENTED (this_arg);
+  ecma_completion_value_t ret_value = ecma_make_empty_completion_value ();
+
+  /* 1. */
+  ECMA_TRY_CATCH (value, ecma_builtin_date_prototype_get_time (this_arg), ret_value);
+  ecma_number_t *this_num = ecma_get_number_from_value (value);
+
+  /* 2. */
+  if (ecma_number_is_nan (*this_num))
+  {
+    ecma_string_t *nan_str_p = ecma_get_magic_string (ECMA_MAGIC_STRING_NAN);
+    ret_value = ecma_make_normal_completion_value (ecma_make_string_value (nan_str_p));
+  }
+  else
+  {
+    /* 3. */
+    int utc_day = ecma_date_week_day (*this_num);
+
+    ecma_number_t *ret_num_p = ecma_alloc_number ();
+    *ret_num_p = ecma_int32_to_number (utc_day);
+    ret_value = ecma_make_normal_completion_value (ecma_make_number_value (ret_num_p));
+  }
+  ECMA_FINALIZE (value);
+
+  return ret_value;
 } /* ecma_builtin_date_prototype_get_utc_day */
 
 /**
@@ -289,7 +490,30 @@ ecma_builtin_date_prototype_get_utc_day (ecma_value_t this_arg) /**< this argume
 static ecma_completion_value_t
 ecma_builtin_date_prototype_get_hours (ecma_value_t this_arg) /**< this argument */
 {
-  ECMA_BUILTIN_CP_UNIMPLEMENTED (this_arg);
+  ecma_completion_value_t ret_value = ecma_make_empty_completion_value ();
+
+  /* 1. */
+  ECMA_TRY_CATCH (value, ecma_builtin_date_prototype_get_time (this_arg), ret_value);
+  ecma_number_t *this_num = ecma_get_number_from_value (value);
+
+  /* 2. */
+  if (ecma_number_is_nan (*this_num))
+  {
+    ecma_string_t *nan_str_p = ecma_get_magic_string (ECMA_MAGIC_STRING_NAN);
+    ret_value = ecma_make_normal_completion_value (ecma_make_string_value (nan_str_p));
+  }
+  else
+  {
+    /* 3. */
+    ecma_number_t hour = ecma_date_hour_from_time (ecma_date_local_time (*this_num));
+
+    ecma_number_t *ret_num_p = ecma_alloc_number ();
+    *ret_num_p = hour;
+    ret_value = ecma_make_normal_completion_value (ecma_make_number_value (ret_num_p));
+  }
+  ECMA_FINALIZE (value);
+
+  return ret_value;
 } /* ecma_builtin_date_prototype_get_hours */
 
 /**
@@ -304,7 +528,30 @@ ecma_builtin_date_prototype_get_hours (ecma_value_t this_arg) /**< this argument
 static ecma_completion_value_t
 ecma_builtin_date_prototype_get_utc_hours (ecma_value_t this_arg) /**< this argument */
 {
-  ECMA_BUILTIN_CP_UNIMPLEMENTED (this_arg);
+  ecma_completion_value_t ret_value = ecma_make_empty_completion_value ();
+
+  /* 1. */
+  ECMA_TRY_CATCH (value, ecma_builtin_date_prototype_get_time (this_arg), ret_value);
+  ecma_number_t *this_num = ecma_get_number_from_value (value);
+
+  /* 2. */
+  if (ecma_number_is_nan (*this_num))
+  {
+    ecma_string_t *nan_str_p = ecma_get_magic_string (ECMA_MAGIC_STRING_NAN);
+    ret_value = ecma_make_normal_completion_value (ecma_make_string_value (nan_str_p));
+  }
+  else
+  {
+    /* 3. */
+    ecma_number_t utc_hour = ecma_date_hour_from_time (*this_num);
+
+    ecma_number_t *ret_num_p = ecma_alloc_number ();
+    *ret_num_p = utc_hour;
+    ret_value = ecma_make_normal_completion_value (ecma_make_number_value (ret_num_p));
+  }
+  ECMA_FINALIZE (value);
+
+  return ret_value;
 } /* ecma_builtin_date_prototype_get_utc_hours */
 
 /**
@@ -319,7 +566,30 @@ ecma_builtin_date_prototype_get_utc_hours (ecma_value_t this_arg) /**< this argu
 static ecma_completion_value_t
 ecma_builtin_date_prototype_get_minutes (ecma_value_t this_arg) /**< this argument */
 {
-  ECMA_BUILTIN_CP_UNIMPLEMENTED (this_arg);
+  ecma_completion_value_t ret_value = ecma_make_empty_completion_value ();
+
+  /* 1. */
+  ECMA_TRY_CATCH (value, ecma_builtin_date_prototype_get_time (this_arg), ret_value);
+  ecma_number_t *this_num = ecma_get_number_from_value (value);
+
+  /* 2. */
+  if (ecma_number_is_nan (*this_num))
+  {
+    ecma_string_t *nan_str_p = ecma_get_magic_string (ECMA_MAGIC_STRING_NAN);
+    ret_value = ecma_make_normal_completion_value (ecma_make_string_value (nan_str_p));
+  }
+  else
+  {
+    /* 3. */
+    ecma_number_t minutes = ecma_date_min_from_time (ecma_date_local_time (*this_num));
+
+    ecma_number_t *ret_num_p = ecma_alloc_number ();
+    *ret_num_p = minutes;
+    ret_value = ecma_make_normal_completion_value (ecma_make_number_value (ret_num_p));
+  }
+  ECMA_FINALIZE (value);
+
+  return ret_value;
 } /* ecma_builtin_date_prototype_get_minutes */
 
 /**
@@ -334,7 +604,30 @@ ecma_builtin_date_prototype_get_minutes (ecma_value_t this_arg) /**< this argume
 static ecma_completion_value_t
 ecma_builtin_date_prototype_get_utc_minutes (ecma_value_t this_arg) /**< this argument */
 {
-  ECMA_BUILTIN_CP_UNIMPLEMENTED (this_arg);
+  ecma_completion_value_t ret_value = ecma_make_empty_completion_value ();
+
+  /* 1. */
+  ECMA_TRY_CATCH (value, ecma_builtin_date_prototype_get_time (this_arg), ret_value);
+  ecma_number_t *this_num = ecma_get_number_from_value (value);
+
+  /* 2. */
+  if (ecma_number_is_nan (*this_num))
+  {
+    ecma_string_t *nan_str_p = ecma_get_magic_string (ECMA_MAGIC_STRING_NAN);
+    ret_value = ecma_make_normal_completion_value (ecma_make_string_value (nan_str_p));
+  }
+  else
+  {
+    /* 3. */
+    ecma_number_t utc_minutes = ecma_date_min_from_time (*this_num);
+
+    ecma_number_t *ret_num_p = ecma_alloc_number ();
+    *ret_num_p = utc_minutes;
+    ret_value = ecma_make_normal_completion_value (ecma_make_number_value (ret_num_p));
+  }
+  ECMA_FINALIZE (value);
+
+  return ret_value;
 } /* ecma_builtin_date_prototype_get_utc_minutes */
 
 /**
